@@ -1,5 +1,7 @@
 from flask import Flask
 
+import os
+
 app = Flask(__name__)
 
 
@@ -9,4 +11,6 @@ def hello_world():
 
 
 if __name__ == '__main__':
-    app.run()
+    FLASK_RUN_PORT=os.getenv('FLASK_RUN_PORT')
+    FLASK_RUN_HOST=os.getenv('FLASK_RUN_HOST')
+    app.run(host=FLASK_RUN_HOST,port=FLASK_RUN_PORT)
