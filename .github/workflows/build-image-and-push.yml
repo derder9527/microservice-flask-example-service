@@ -1,0 +1,38 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Java CI with Maven and build push docker image
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set time zone
+      run: sudo timedatectl set-timezone 'Asia/Taipei'
+
+    - uses: actions/checkout@v2
+
+    - name: Extract git info
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})" && echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      id: extract_git_info
+
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y%m%d%H%M')"
+
+    - uses: mr-smithers-excellent/docker-build-push@v5
+      name: Build & push Docker image
+      with:
+        image: derder9527/microservice-flask-example-service
+        tags: ${{ steps.extract_git_info.outputs.branch }}-${{ steps.extract_git_info.outputs.sha_short }}-${{ steps.date.outputs.date }} , latest
+        registry: docker.io
+        dockerfile: Dockerfile
+        username: ${{ secrets.DOCKER_USER_NAME }}
+        password: ${{ secrets.DOCKER_USER_PASSWORD }}
